@@ -26,7 +26,7 @@ public class MainProducer {
         return Arrays.asList("sensor-1", "sensor-2", "sensor-3");
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Properties props = new Properties();
         props.put("bootstrap.servers", "kafka1:9092");
         props.put("client.id", "cdc-producer");
@@ -42,11 +42,19 @@ public class MainProducer {
 
 
         Producer<String, String> producer = new KafkaProducer<>(props);
+        MainProducer mainProducer = new MainProducer();
+        List<String> sensors = mainProducer.sensors();
 
         Random random = new Random();
+
         for(int i = 0; i < 10000; i++) {
-            producer.send(new ProducerRecord<>("cluster-test", Integer.toString(random.nextInt()),
-                    Integer.toString(random.nextInt())), (metadata, exception) -> {
+            int sensorIndex = random.nextInt(3);
+            String sensorStr = sensors.get(sensorIndex);
+            int temp = mainProducer.generateTemperature();
+            long currentMs = System.currentTimeMillis();
+            String payload = new StringBuilder().append(sensorStr).append("|").append(currentMs).append("|").append(i).toString();
+
+            producer.send(new ProducerRecord<>("cluster-temp", sensorStr, payload), (metadata, exception) -> {
                 if (exception != null)
                     log.error("", exception);
             });
@@ -56,7 +64,9 @@ public class MainProducer {
 
         Map<MetricName, ? extends Metric> metrics = producer.metrics();
 
-        log.info("metrics {}", metrics.toString());
+        for (MetricName name : metrics.keySet()) {
+            log.info("metrics {} {}", name, metrics.get(name).metricValue());
+        }
 
         producer.close();
     }
