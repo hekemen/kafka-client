@@ -27,7 +27,7 @@ public class MainConsumer {
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("innova-cluster-test"), new ConsumerRebalanceListener() {
+        consumer.subscribe(Arrays.asList("cluster-test"), new ConsumerRebalanceListener() {
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
                 log.info("Partition Revoked {}", partitions.toString());

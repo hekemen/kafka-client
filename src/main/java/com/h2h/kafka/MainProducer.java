@@ -8,12 +8,23 @@ import org.apache.kafka.common.MetricName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
+import java.util.*;
 
 public class MainProducer {
     static Logger log = LoggerFactory.getLogger(MainProducer.class);
+    static final int MAX_TEMP = 50;
+    static final int MIN_TEMP = -50;
+
+    public int generateTemperature() {
+        Random random = new Random();
+        return random.ints(MIN_TEMP, MAX_TEMP)
+                .findFirst()
+                .getAsInt();
+    }
+
+    public List<String> sensors() {
+        return Arrays.asList("sensor-1", "sensor-2", "sensor-3");
+    }
 
     public static void main(String[] args) {
         Properties props = new Properties();
@@ -34,7 +45,7 @@ public class MainProducer {
 
         Random random = new Random();
         for(int i = 0; i < 10000; i++) {
-            producer.send(new ProducerRecord<>("innova-cluster-test", Integer.toString(random.nextInt()),
+            producer.send(new ProducerRecord<>("cluster-test", Integer.toString(random.nextInt()),
                     Integer.toString(random.nextInt())), (metadata, exception) -> {
                 if (exception != null)
                     log.error("", exception);
